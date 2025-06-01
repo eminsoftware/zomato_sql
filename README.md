@@ -218,26 +218,26 @@ where menu_id in (
 
 ### Basic Tasks (1-8)
 ```sql
--- 1) List all distinct cities where restaurants are located.
+1) -- List all distinct cities where restaurants are located.
 
 select distinct city 
 from restaurant;
 ```
 ```sql
--- 2) Count how many users are there in total.
+2) -- Count how many users are there in total.
 
 select count(user_id)
 from users;
 ```
 ```sql
--- 3) List all users whose age is below 25.
+3) -- List all users whose age is below 25.
 
 select * 
 from users
 where age < 25;
 ```
 ```sql
--- 4) Find total number of menu items for each restaurant.
+4) -- Find total number of menu items for each restaurant.
 
 select name, 
 	   r_id, 
@@ -248,7 +248,7 @@ on m.r_id = r.id
 group by 1, 2;
 ```
 ```sql
--- 5) List top 3 most common occupations among users.
+5) -- List top 3 most common occupations among users.
 
 select occupation, 
 	   count(*)
@@ -257,7 +257,7 @@ group by 1
 limit 3;
 ```
 ```sql
--- 6) Show all restaurants with cost greater than ₹500.
+6) -- Show all restaurants with cost greater than ₹500.
 
 select *
 from restaurant
@@ -265,7 +265,7 @@ where substring(cost,2)::int > 500
 and cost != '';
 ```
 ```sql
--- 7) Count the number of restaurants per city.
+7) -- Count the number of restaurants per city.
       /* some city names are inputted like 'city x, city' and some of them like 'city x & city y'
       replace function converts '&' to a comma. then, unnest splits by a comma */
 
@@ -276,16 +276,16 @@ group by 1
 order by 2 desc;
 ```
 ```sql
--- 8) List all non-veg items from the food table.
+8) -- List all non-veg items from the food table.
 
 select item 
 from food 
 where veg_or_non_veg = 'Non-veg';
 ```
 
-### Intermediate Tasks (9-16)
+### Intermediate Tasks (9-17)
 ```sql
--- 9) Find the average number of items sold per restaurant.
+9) -- Find the average number of items sold per restaurant.
 
 select r_id, 
        name, 
@@ -297,7 +297,7 @@ group by 1, 2
 order by 3 desc;
 ```
 ```sql
--- 10) Identify users who have never placed an order.
+10) -- Identify users who have never placed an order.
 
 select * 
 from users
@@ -308,7 +308,7 @@ from orders
 );
 ```
 ```sql
--- 11) Determine which food item appears most frequently in the menu.
+11) -- Determine which food item appears most frequently in the menu.
 
 select f_id, 
 	   food_name, 
@@ -328,7 +328,7 @@ group by 1, 2, 3
 order by 4 desc;
 ```
 ```sql
--- 12) Find 5 users with the highest total sales_amount.
+12) -- Find 5 users with the highest total sales_amount.
 
 select name, 
 	   sales_qty, 
@@ -340,7 +340,7 @@ order by 2 desc
 limit 5;
 ```
 ```sql
--- 13) Get a count of orders per month using order_date.
+13) -- Get a count of orders per month using order_date.
 
 select extract(month from order_date) as month, 
        count(user_id) as cnt_orders
@@ -349,14 +349,14 @@ group by 1
 order by 1;
 ```
 ```sql
--- 14) Find restaurants that serve a specific cuisine (e.g., 'Chinese').
+14) -- Find restaurants that serve a specific cuisine (e.g., 'Chinese').
 
 select * 
 from menu
 where cuisine like '%Chinese%';
 ```
 ```sql
--- 14) Find the average age of users by city.
+15) -- Find the average age of users by city.
 
 select trim(unnest(string_to_array(city, ','))) as city_name, 
        round(avg(age)) as avg_age
@@ -369,7 +369,7 @@ group by 1
 order by 1;
 ```
 ```sql
--- 15) Count total number of veg vs non-veg items.
+16) -- Count total number of veg vs non-veg items.
 
 select veg_or_non_veg, 
        count(f_id)
@@ -378,7 +378,7 @@ where veg_or_non_veg is not null
 group by 1;
 ```
 ```sql
--- 16) Create a report showing each user's total and average spending.
+17) -- Create a report showing each user's total and average spending.
 
 select user_id, 
        name, 
@@ -395,11 +395,11 @@ group by 1, 2
 order by user_id;
 ```
 
-### Advanced Tasks (17-21)
+### Advanced Tasks (18-22)
 ```sql
--- 17) Create the following function:
-	   /* input: r_id
-	      output: Top 3 food items by sales from that restaurant. */
+18) --  Create the following function:
+        /* input: r_id
+        output: Top 3 food items by sales from that restaurant. */
 
 create or replace function fn_top_items(p_rid int)
 returns text
@@ -439,9 +439,9 @@ language plpgsql;
 select fn_top_items('564436');
 ```
 ```sql
--- 18) Create the following function:
-	   /* input: user_id
-	      output: name, age, monthly income of the given user */
+19) -- Create the following function:
+       /* input: user_id
+       output: name, age, monthly income of the given user */
 
 create or replace function fn_user_info(p_userid int)
 returns table
@@ -472,7 +472,7 @@ select *
 from fn_user_info('76543');
 ```
 ```sql
--- 19) Create a materialized view that shows monthly revenue for each restaurant.
+20) -- Create a materialized view that shows monthly revenue for each restaurant.
 
 create materialized view mn_monthly_revenue as
 select 
@@ -492,9 +492,8 @@ from mn_monthly_revenue;
 refresh materialized view mv_monthly_revenue;
 ```
 ```sql
--- 20) Create a trigger to automatically log every order over ₹1000 into a table called high_value_orders
---     whenever an order is inserted into the orders table.
-
+21) -- Create a trigger to automatically log every order over ₹1000 into a table called high_value_orders
+    -- whenever an order is inserted into the orders table.
 
 create table high_value_orders
 (
@@ -507,7 +506,6 @@ create table high_value_orders
   r_id text,
   logged_at TIMESTAMP default now()
 );
-
 
 create or replace function tr_fn_high_value_orders()
 returns trigger
@@ -527,7 +525,6 @@ end;
 $$
 language plpgsql;
 
-
 create trigger tr_high_value_orders
 after insert on orders
 for each row
@@ -540,8 +537,8 @@ select *
 from high_value_orders;
 ```
 ```sql
--- 21) Create a trigger to automatically log old and new price into table called price_change
---     after an update on menu table
+22) -- Create a trigger to automatically log old and new price into table called price_change
+    -- after an update on menu table
 
 create table price_change
 (
@@ -579,7 +576,6 @@ execute function tr_fn_price_change();
 update menu
 set price = 70.0
 where menu_id = 'mn328'; 
-
 
 select * 
 from price_change;
