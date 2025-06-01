@@ -269,7 +269,7 @@ from food
 where veg_or_non_veg = 'Non-veg';
 
 
--- INTERMEDIATE TASKS (tasks 9-16)
+-- INTERMEDIATE TASKS (tasks 9-17)
 
 
 -- 9) Find the average number of items sold per restaurant.
@@ -343,7 +343,7 @@ from menu
 where cuisine like '%Chinese%';
 
 
--- 14) Find the average age of users by city.
+-- 15) Find the average age of users by city.
 
 select trim(unnest(string_to_array(city, ','))) as city_name, 
        round(avg(age)) as avg_age
@@ -356,7 +356,7 @@ group by 1
 order by 1;
 
 
--- 15) Count total number of veg vs non-veg items.
+-- 16) Count total number of veg vs non-veg items.
 
 select veg_or_non_veg, 
        count(f_id)
@@ -365,7 +365,7 @@ where veg_or_non_veg is not null
 group by 1;
 
 
--- 16) Create a report showing each user's total and average spending.
+-- 17) Create a report showing each user's total and average spending.
 
 select user_id, 
        name, 
@@ -383,9 +383,9 @@ order by user_id;
 
 
 
--- ADVANCED TASKS (tasks 17-21)
+-- ADVANCED TASKS (tasks 18-22)
 
--- 17) Create the following function:
+-- 18) Create the following function:
 	   /* input: r_id
 	      output: Top 3 food items by sales from that restaurant. */
 
@@ -427,7 +427,7 @@ language plpgsql;
 select fn_top_items('564436');
 
 
--- 18) Create the following function:
+-- 19) Create the following function:
 	   /* input: user_id
 	      output: name, age, monthly income of the given user */
 
@@ -460,7 +460,7 @@ select *
 from fn_user_info('76543');
 
 
--- 19) Create a materialized view that shows monthly revenue for each restaurant.
+-- 20) Create a materialized view that shows monthly revenue for each restaurant.
 
 create materialized view mn_monthly_revenue as
 select 
@@ -480,7 +480,7 @@ from mn_monthly_revenue;
 refresh materialized view mv_monthly_revenue;
 
 
--- 20) Create a trigger to automatically log every order over ₹1000 into a table called high_value_orders
+-- 21) Create a trigger to automatically log every order over ₹1000 into a table called high_value_orders
 --     whenever an order is inserted into the orders table.
 
 
@@ -529,7 +529,7 @@ from high_value_orders;
 
 --
 
--- 21) Create a trigger to automatically log old and new price into table called price_change
+-- 22) Create a trigger to automatically log old and new price into table called price_change
 --     after an update on menu table
 
 create table price_change
@@ -569,107 +569,7 @@ update menu
 set price = 70.0
 where menu_id = 'mn328'; 
 
-
 select * 
 from price_change;
 
-
-
-
------------------------------------------------------------------
-
--- NOTES
-
-select * from users;
-select * from orders;
-select * from menu;
-select * from restaurant;
-
-
-SELECT ASCII('A');  -- Returns 65
-
-SELECT CHR(65);     -- Returns 'A'
-
-select address 
-from restaurant 
-order by length(address) desc;
-
--- find dublicates
-select f_id, r_id, cuisine, price, count(*)
-from menu
-group by 1, 2, 3, 4
-having count(*) > 1;
-
-with ranked_menu as (
-  select *,
-         row_number() over (
-           partition by r_id, f_id, cuisine, price order by menu_id
-         ) as rn
-  from menu
-)
-delete from menu
-where menu_id in (
-  select menu_id from ranked_menu where rn > 1
-);
-
-select item as food_name, f_id
-from food
-where item in
-(
-select item
-from food
-group by item
-having count(distinct f_id) > 1
-)
-order by food_name, f_id;
-
-
--- simple functions
-
-CREATE OR REPLACE FUNCTION get_restaurant_name(p_rid TEXT)
-RETURNS TEXT 
-AS $$
-DECLARE
-  r_name TEXT;
-BEGIN
-  SELECT name INTO r_name
-  FROM restaurant
-  WHERE id = p_rid;
-
-  RETURN r_name;
-END;
-$$ LANGUAGE plpgsql;
-
-
-SELECT get_restaurant_name('100010') as restaurant_name;
-
-
-create or replace function fn_user_name(p_user_id int)
-returns varchar(40)
-as $$
-
-declare u_name varchar(40);
-begin
-
-	select name into u_name
-	from users
-	where user_id = p_user_id;
-	
-	return u_name;
-
-end;
-
-$$ language plpgsql;
-
-select fn_user_name('44') as user_name;
-
-
--- materialized view
-
-create materialized view mv_user_info as
-select name, age
-from users;
-
-select * from mv_user_info;
-
-refresh materialized view mv_user_info;
+--
